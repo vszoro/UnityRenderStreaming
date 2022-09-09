@@ -103,7 +103,7 @@ namespace Unity.RenderStreaming
 
         internal static void DomainLoad()
         {
-            WebRTC.WebRTC.Initialize();
+            WebRTC.WebRTC.Initialize(true, true, NativeLoggingSeverity.LS_VERBOSE);
         }
 
         internal static void DomainUnload()
