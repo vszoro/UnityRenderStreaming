@@ -155,7 +155,7 @@ namespace Unity.RenderStreaming
 
         void Awake()
         {
-            if (!runOnAwake || m_running)
+            if (!runOnAwake || m_running || handlers.Count == 0)
                 return;
 
             RTCConfiguration conf = new RTCConfiguration { iceServers = iceServers };
