@@ -12,7 +12,7 @@ using UnityEditor;
 
 namespace Unity.RenderStreaming
 {
-    public sealed class RenderStreaming : MonoBehaviour
+    public sealed class RenderStreamingHandler : MonoBehaviour
     {
 #pragma warning disable 0649
         [SerializeField, Tooltip("Signaling server url.")]
@@ -34,7 +34,7 @@ namespace Unity.RenderStreaming
         private List<SignalingHandlerBase> handlers = new List<SignalingHandlerBase>();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [SerializeField, Tooltip("Automatically started when called Awake method.")]
         public bool runOnAwake = true;
@@ -96,7 +96,7 @@ namespace Unity.RenderStreaming
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="conf"></param>
         /// <param name="signaling"></param>
@@ -144,7 +144,7 @@ namespace Unity.RenderStreaming
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void Stop()
         {
