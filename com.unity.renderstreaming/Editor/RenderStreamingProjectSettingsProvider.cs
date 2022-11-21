@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Unity.RenderStreaming.Editor;
 using Unity.RenderStreaming.Editor.UI;
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Unity.RenderStreaming
@@ -15,6 +17,8 @@ namespace Unity.RenderStreaming
         const string kStylePath = "Packages/com.unity.renderstreaming/Editor/Styles/RenderStreamingProjectSettings.uss";
 
         private VisualElementCache cache;
+        private ObjectField renderStreamingSettingsField => cache.Get<ObjectField>("renderStreamingSettingsField");
+        private Toggle automaticStreaming => cache.Get<Toggle>("automaticStreaming");
         private VisualElement signalingTypeContainer => cache.Get<VisualElement>("signalingTypeContainer");
         private Editor.UI.SignalingSettings signalingSettings => cache.Get<Editor.UI.SignalingSettings>("signalingSettings");
 
@@ -48,8 +52,22 @@ namespace Unity.RenderStreaming
 
             cache = new VisualElementCache(newVisualElement);
 
-            var popupField = new SignalingTypePopup("Signaling Type", 0);
+            renderStreamingSettingsField.RegisterCallback<ChangeEvent<Object>>(ev =>
+            {
+                RenderStreaming.Settings = (RenderStreamingSettings)ev.newValue;
+                this.Repaint();
+            });
+
+            automaticStreaming.value = RenderStreaming.Settings.automaticStreaming;
+            automaticStreaming.RegisterCallback<ChangeEvent<bool>>(ev =>
+            {
+                RenderStreaming.Settings.automaticStreaming = ev.newValue;
+            });
+
+            var signalingSettingsType = RenderStreaming.Settings.signalingSettings.GetType();
+            var popupField = new SignalingTypePopup("Signaling Type", signalingSettingsType.Name);
             popupField.ChangeEvent += newType => signalingSettings.ChangeSignalingType(newType);
+            signalingSettings.ChangeSignalingType(signalingSettingsType);
             signalingTypeContainer.Add(popupField);
         }
 

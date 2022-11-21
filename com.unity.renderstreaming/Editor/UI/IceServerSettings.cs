@@ -120,7 +120,11 @@ namespace Unity.RenderStreaming.Editor.UI
         {
             urlList.ClearSelection();
             urlList.style.height = urlList.itemHeight * urlList.itemsSource.Count;
+#if UNITY_2021_3_OR_NEWER
+            urlList.Rebuild();
+#else
             urlList.Refresh();
+#endif
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Unity.RenderStreaming.Editor.UI
         public override VisualElement CreateInspectorGUI()
         {
             VisualElement root = new VisualElement();
+            RenderStreamingSettings settings = serializedObject.targetObject as RenderStreamingSettings;
 
             // var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/SampleUI.uxml");
             // visualTree.CloneTree(root);
@@ -28,16 +29,17 @@ namespace Unity.RenderStreaming.Editor.UI
                 serializedObject.ApplyModifiedProperties();
             }));
 
-            var signalingSettingsUI = new SignalingSettings();
-            var popupField = new SignalingTypePopup("Signaling Type", 0);
+            var signalingSettings = new SignalingSettings();
+            var signalingSettingsType = RenderStreaming.Settings.signalingSettings.GetType();
+            var popupField = new SignalingTypePopup("Signaling Type", signalingSettingsType.Name);
             popupField.ChangeEvent += newType =>
             {
-                var property = serializedObject.FindProperty("signalingSettings");
-                property.managedReferenceValue = Activator.CreateInstance(newType) as SignalingSettings;
-                signalingSettingsUI.ChangeSignalingType(newType);
+                settings.signalingSettings = Activator.CreateInstance(newType) as Unity.RenderStreaming.SignalingSettings;
+                signalingSettings.ChangeSignalingType(newType);
             };
+            signalingSettings.ChangeSignalingType(signalingSettingsType);
             root.Add(popupField);
-            root.Add(signalingSettingsUI);
+            root.Add(signalingSettings);
 
             return root;
         }

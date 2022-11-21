@@ -18,8 +18,8 @@ namespace Unity.RenderStreaming.Editor.UI
 
         private static readonly List<string> types = relevantSignalingSettingTypes.Select(x => x.Name).ToList();
 
-        public SignalingTypePopup(string label, int defaultIndex) :
-            base(label, types, defaultIndex, ItemNameFormatter, ItemNameFormatter)
+        public SignalingTypePopup(string label, string defaultValue) :
+            base(label, types, defaultValue, ItemNameFormatter, ItemNameFormatter)
         {
             RegisterCallback<ChangeEvent<string>>(ChangeSignalingType);
         }

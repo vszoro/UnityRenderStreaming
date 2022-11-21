@@ -1,6 +1,3 @@
-using System.Threading;
-using Unity.RenderStreaming.Signaling;
-using Unity.WebRTC;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -16,25 +13,36 @@ namespace Unity.RenderStreaming
     {
         private static RenderStreamingSettings s_Settings;
 
+        public static RenderStreamingSettings Settings
+        {
+            get => s_Settings;
+            set => s_Settings = value;
+        }
+
         public static bool IsAutomaticEnabled()
         {
-            //todo: detected by settings
-            return false;
+            return s_Settings.automaticStreaming;
         }
 
         public static T GetSignalingSettings<T>() where T : SignalingSettings
         {
-            var setting = new WebSocketSignalingSettings();
-            setting.urlSignaling = "ws://localhost:3000";
-            setting.iceServers = new ICEServer[]
-            {
-                new ICEServer() {urls = new string[] {"stun:stun.l.google.com:19302"}}
-            };
-            return setting as T;
+            return s_Settings.signalingSettings as T;
         }
 
         static RenderStreaming()
         {
+            // todo: load from assets
+            var settings = ScriptableObject.CreateInstance<RenderStreamingSettings>();
+            var signalingSettings = new WebSocketSignalingSettings
+            {
+                urlSignaling = "http://localhost:3000",
+                iceServers = new[] {new ICEServer {urls = new[] {"stun:stun.l.google.com:19302"}}}
+            };
+
+            settings.automaticStreaming = true;
+            settings.signalingSettings = signalingSettings;
+            s_Settings = settings;
+
             // load settings
 #if UNITY_EDITOR
             InitializeInEditor();

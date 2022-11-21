@@ -39,9 +39,9 @@ namespace Unity.RenderStreaming
         [SerializeField, Tooltip("Automatically started when called Awake method.")]
         public bool runOnAwake = true;
 
-        [SerializeField] public SignalingSettings settings;
 #pragma warning restore 0649
 
+        internal SignalingSettings signalingSettings;
         private RenderStreamingInternal m_instance;
         private SignalingEventProvider m_provider;
         private bool m_running;
@@ -51,7 +51,7 @@ namespace Unity.RenderStreaming
 
         public T GetSignalingSettings<T>() where T : SignalingSettings
         {
-            return settings as T;
+            return signalingSettings as T;
         }
 
         public void SetSignalingSettings(SignalingSettings settings)
@@ -61,7 +61,7 @@ namespace Unity.RenderStreaming
                 throw new InvalidOperationException("The Signaling process has already started.");
             }
 
-            this.settings = settings;
+            signalingSettings = settings;
         }
 
         public void AddSignalingHandler(SignalingHandlerBase handlerBase)
@@ -117,8 +117,8 @@ namespace Unity.RenderStreaming
 
         public void Run()
         {
-            var signaling = CreateSignaling(settings.signalingClass.FullName, settings.urlSignaling, 5.0f, SynchronizationContext.Current);
-            var conf = new RTCConfiguration {iceServers = settings.iceServers.Select(x => (RTCIceServer)x).ToArray()};
+            var signaling = CreateSignaling(signalingSettings.signalingClass.FullName, signalingSettings.urlSignaling, 5.0f, SynchronizationContext.Current);
+            var conf = new RTCConfiguration {iceServers = signalingSettings.iceServers.Select(x => (RTCIceServer)x).ToArray()};
             _Run(conf, signaling, handlers.ToArray());
         }
 

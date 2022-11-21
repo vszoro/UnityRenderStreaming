@@ -41,13 +41,29 @@ namespace Unity.RenderStreaming.Editor.UI
             cache = new VisualElementCache(newVisualElement);
             draft = new ObservableCollection<ICEServer>();
 
+            var signalingSettings = RenderStreaming.Settings.signalingSettings;
+            signalingUrlField.value = signalingSettings.urlSignaling;
+            signalingUrlField.RegisterCallback<ChangeEvent<string>>(ev =>
+            {
+                signalingSettings.urlSignaling = ev.newValue;
+            });
             iceServerCountField.RegisterCallback<ChangeEvent<int>>(ChangeSize);
         }
 
         public void ChangeSignalingType(Type newType)
         {
-            extensionSettingContainer.Clear();
+            if (!(Activator.CreateInstance(newType) is Unity.RenderStreaming.SignalingSettings newSettings))
+            {
+                throw new InvalidOperationException();
+            }
 
+            var oldSettings = RenderStreaming.Settings.signalingSettings;
+            newSettings.runOnAwake = oldSettings.runOnAwake;
+            newSettings.urlSignaling = oldSettings.urlSignaling;
+            newSettings.iceServers = oldSettings.iceServers;
+            RenderStreaming.Settings.signalingSettings = newSettings;
+
+            extensionSettingContainer.Clear();
             var inspectorType = CustomSignalingSettingsEditor.FindCustomInspectorTypeByType(newType);
             if (inspectorType == null)
             {

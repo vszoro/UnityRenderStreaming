@@ -24,7 +24,7 @@ namespace Unity.RenderStreaming.Signaling
 
         public WebSocketSignaling(string url, float timeout, SynchronizationContext mainThreadContext)
         {
-            m_url = url;
+            m_url = url.Replace("http", "ws");
             m_timeout = timeout;
             m_mainThreadContext = mainThreadContext;
             m_wsCloseEvent = new AutoResetEvent(false);
