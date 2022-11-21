@@ -1,16 +1,21 @@
-using System.Collections;
+using System;
+using System.Linq;
+using Unity.RenderStreaming.InputSystem;
+using Unity.WebRTC;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 
 namespace Unity.RenderStreaming
 {
-    public class AutomaticStreaming : MonoBehaviour
+    internal class AutomaticStreaming : MonoBehaviour
     {
         private RenderStreamingHandler renderstreaming;
         private Broadcast broadcast;
         private VideoStreamSender videoStreamSender;
         private AudioStreamSender audioStreamSender;
-        private InputReceiverWithoutActions inputReceiver;
+        private AutoInputReceiver inputReceiver;
 
         private void Awake()
         {
@@ -23,7 +28,7 @@ namespace Unity.RenderStreaming
             audioStreamSender = gameObject.AddComponent<AudioStreamSender>();
             audioStreamSender.source = AudioStreamSource.APIOnly;
 
-            inputReceiver = gameObject.AddComponent<InputReceiverWithoutActions>();
+            inputReceiver = gameObject.AddComponent<AutoInputReceiver>();
 
             broadcast = gameObject.AddComponent<Broadcast>();
             broadcast.AddComponent(videoStreamSender);
@@ -43,6 +48,7 @@ namespace Unity.RenderStreaming
                 {
                     return;
                 }
+
                 var autoFilter = audioListener.gameObject.AddComponent<AutoAudioFilter>();
                 autoFilter.SetSender(audioStreamSender);
             };
@@ -101,6 +107,103 @@ namespace Unity.RenderStreaming
             private void OnDestroy()
             {
                 sender = null;
+            }
+        }
+
+        class AutoInputReceiver : InputChannelReceiverBase
+        {
+            public override event Action<InputDevice, InputDeviceChange> onDeviceChange;
+
+            protected virtual void OnEnable()
+            {
+                m_Enabled = true;
+                onDeviceChange += OnDeviceChange;
+            }
+
+            protected virtual void OnDisable()
+            {
+                m_Enabled = false;
+                onDeviceChange -= OnDeviceChange;
+            }
+
+            private void PerformPairingWithDevice(InputDevice device)
+            {
+                m_InputUser = InputUser.PerformPairingWithDevice(device, m_InputUser);
+            }
+
+            private void UnpairDevices(InputDevice device)
+            {
+                if (!m_InputUser.valid)
+                    return;
+                m_InputUser.UnpairDevice(device);
+            }
+
+            public override void SetChannel(string connectionId, RTCDataChannel channel)
+            {
+                if (channel == null)
+                {
+                    Dispose();
+                }
+                else
+                {
+                    AssignUserAndDevices();
+                    receiver = new Receiver(channel);
+                    receiver.onDeviceChange += onDeviceChange;
+                    receiverInput = new InputSystem.InputRemoting(receiver);
+                    subscriberDisposer = receiverInput.Subscribe(receiverInput);
+                    receiverInput.StartSending();
+                }
+
+                base.SetChannel(connectionId, channel);
+            }
+
+            protected virtual void OnDestroy()
+            {
+                Dispose();
+            }
+
+            protected virtual void Dispose()
+            {
+                UnassignUserAndDevices();
+                receiverInput?.StopSending();
+                subscriberDisposer?.Dispose();
+                receiver?.Dispose();
+                receiver = null;
+            }
+
+            [NonSerialized] private bool m_Enabled;
+            [NonSerialized] private InputUser m_InputUser;
+
+            [NonSerialized] private Receiver receiver;
+            [NonSerialized] private InputSystem.InputRemoting receiverInput;
+            [NonSerialized] private IDisposable subscriberDisposer;
+
+            private void AssignUserAndDevices()
+            {
+                m_InputUser = InputUser.all.FirstOrDefault();
+            }
+
+            private void UnassignUserAndDevices()
+            {
+                if (!m_InputUser.valid)
+                {
+                    return;
+                }
+
+                m_InputUser.UnpairDevicesAndRemoveUser();
+            }
+
+            protected virtual void OnDeviceChange(InputDevice device, InputDeviceChange change)
+            {
+                switch (change)
+                {
+                    case InputDeviceChange.Added:
+                        PerformPairingWithDevice(device);
+                        return;
+                    case InputDeviceChange.Removed:
+                        UnpairDevices(device);
+                        return;
+                }
             }
         }
     }
