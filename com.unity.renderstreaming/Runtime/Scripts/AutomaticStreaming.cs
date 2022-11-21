@@ -164,7 +164,6 @@ namespace Unity.RenderStreaming
 
             protected virtual void Dispose()
             {
-                UnassignUserAndDevices();
                 receiverInput?.StopSending();
                 subscriberDisposer?.Dispose();
                 receiver?.Dispose();
@@ -181,16 +180,6 @@ namespace Unity.RenderStreaming
             private void AssignUserAndDevices()
             {
                 m_InputUser = InputUser.all.FirstOrDefault();
-            }
-
-            private void UnassignUserAndDevices()
-            {
-                if (!m_InputUser.valid)
-                {
-                    return;
-                }
-
-                m_InputUser.UnpairDevicesAndRemoveUser();
             }
 
             protected virtual void OnDeviceChange(InputDevice device, InputDeviceChange change)
