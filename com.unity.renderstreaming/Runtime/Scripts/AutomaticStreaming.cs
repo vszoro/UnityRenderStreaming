@@ -10,6 +10,7 @@ namespace Unity.RenderStreaming
         private Broadcast broadcast;
         private VideoStreamSender videoStreamSender;
         private AudioStreamSender audioStreamSender;
+        private InputReceiverWithoutActions inputReceiver;
 
         private void Awake()
         {
@@ -22,9 +23,12 @@ namespace Unity.RenderStreaming
             audioStreamSender = gameObject.AddComponent<AudioStreamSender>();
             audioStreamSender.source = AudioStreamSource.APIOnly;
 
+            inputReceiver = gameObject.AddComponent<InputReceiverWithoutActions>();
+
             broadcast = gameObject.AddComponent<Broadcast>();
             broadcast.AddComponent(videoStreamSender);
             broadcast.AddComponent(audioStreamSender);
+            broadcast.AddComponent(inputReceiver);
 
             renderstreaming = gameObject.AddComponent<RenderStreamingHandler>();
             renderstreaming.AddSignalingHandler(broadcast);
