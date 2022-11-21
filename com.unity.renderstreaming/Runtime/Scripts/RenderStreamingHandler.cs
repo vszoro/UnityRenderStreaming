@@ -117,8 +117,7 @@ namespace Unity.RenderStreaming
 
         public void Run()
         {
-            var type = settings.GetType();
-            var signaling = CreateSignaling(type.ToString(), settings.urlSignaling, 5.0f, SynchronizationContext.Current);
+            var signaling = CreateSignaling(settings.signalingClass.FullName, settings.urlSignaling, 5.0f, SynchronizationContext.Current);
             var conf = new RTCConfiguration {iceServers = settings.iceServers.Select(x => (RTCIceServer)x).ToArray()};
             _Run(conf, signaling, handlers.ToArray());
         }

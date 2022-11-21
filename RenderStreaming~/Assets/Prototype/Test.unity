@@ -226,7 +226,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &272956936
 AudioSource:
@@ -499,7 +499,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1040635542}
   - component: {fileID: 1040635543}
-  - component: {fileID: 1040635545}
   - component: {fileID: 1040635544}
   m_Layer: 0
   m_Name: RenderStreamingTest
@@ -520,7 +519,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1040635543
 MonoBehaviour:
@@ -544,29 +543,6 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1040635541}
   m_Enabled: 1
---- !u!114 &1040635545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1040635541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 045786cf504bd7347842d6948241cbd0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  urlSignaling: http://localhost
-  signalingType: Unity.RenderStreaming.Signaling.HttpSignaling
-  iceServers:
-  - credential: 
-    credentialType: 0
-    urls:
-    - stun:stun.l.google.com:19302
-    username: 
-  interval: 5
-  handlers: []
-  runOnAwake: 1
 --- !u!1 &1049920866
 GameObject:
   m_ObjectHideFlags: 0

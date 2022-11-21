@@ -1,4 +1,5 @@
 using System;
+using Unity.RenderStreaming.Signaling;
 using Unity.WebRTC;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ namespace Unity.RenderStreaming
         public bool runOnAwake;
         public string urlSignaling = "http://localhost";
         public ICEServer[] iceServers;
+        public abstract Type signalingClass { get; }
     }
 
     [Serializable]
@@ -54,16 +56,19 @@ namespace Unity.RenderStreaming
     public class HttpSignalingSettings : SignalingSettings
     {
         public float interval = 5.0f;
+        public override Type signalingClass => typeof(HttpSignaling);
     }
 
     [Serializable]
     public class WebSocketSignalingSettings : SignalingSettings
     {
+        public override Type signalingClass => typeof(WebSocketSignaling);
     }
 
     [Serializable]
     public class FurioosSignalingSettings : SignalingSettings
     {
+        public override Type signalingClass => typeof(FurioosSignaling);
     }
 
     [Serializable]
