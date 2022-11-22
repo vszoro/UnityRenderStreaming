@@ -21,7 +21,7 @@ namespace Unity.RenderStreaming
 
         public static bool IsAutomaticEnabled()
         {
-            return s_Settings.automaticStreaming;
+            return s_Settings != null && s_Settings.automaticStreaming;
         }
 
         public static T GetSignalingSettings<T>() where T : SignalingSettings

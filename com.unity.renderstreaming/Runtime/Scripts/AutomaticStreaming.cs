@@ -21,18 +21,18 @@ namespace Unity.RenderStreaming
         {
             gameObject.hideFlags = HideFlags.HideInHierarchy;
 
+            broadcast = gameObject.AddComponent<Broadcast>();
+
             videoStreamSender = gameObject.AddComponent<VideoStreamSender>();
             videoStreamSender.source = VideoStreamSource.Screen;
             videoStreamSender.SetTextureSize(new Vector2Int(Screen.width, Screen.height));
+            broadcast.AddComponent(videoStreamSender);
 
             audioStreamSender = gameObject.AddComponent<AudioStreamSender>();
             audioStreamSender.source = AudioStreamSource.APIOnly;
+            broadcast.AddComponent(audioStreamSender);
 
             inputReceiver = gameObject.AddComponent<AutoInputReceiver>();
-
-            broadcast = gameObject.AddComponent<Broadcast>();
-            broadcast.AddComponent(videoStreamSender);
-            broadcast.AddComponent(audioStreamSender);
             broadcast.AddComponent(inputReceiver);
 
             renderstreaming = gameObject.AddComponent<RenderStreamingHandler>();
@@ -61,6 +61,7 @@ namespace Unity.RenderStreaming
             broadcast = null;
             videoStreamSender = null;
             audioStreamSender = null;
+            inputReceiver = null;
         }
 
         class AutoAudioFilter : MonoBehaviour
@@ -96,12 +97,12 @@ namespace Unity.RenderStreaming
 
             private void OnAudioFilterRead(float[] data, int channels)
             {
-                if (sender.source != AudioStreamSource.APIOnly)
+                if (sender == null || sender.source != AudioStreamSource.APIOnly)
                 {
                     return;
                 }
 
-                sender?.SetData(data, channels, m_sampleRate);
+                sender.SetData(data, channels, m_sampleRate);
             }
 
             private void OnDestroy()
@@ -116,26 +117,24 @@ namespace Unity.RenderStreaming
 
             protected virtual void OnEnable()
             {
-                m_Enabled = true;
                 onDeviceChange += OnDeviceChange;
             }
 
             protected virtual void OnDisable()
             {
-                m_Enabled = false;
                 onDeviceChange -= OnDeviceChange;
             }
 
             private void PerformPairingWithDevice(InputDevice device)
             {
-                m_InputUser = InputUser.PerformPairingWithDevice(device, m_InputUser);
+                inputUser = InputUser.PerformPairingWithDevice(device, inputUser);
             }
 
             private void UnpairDevices(InputDevice device)
             {
-                if (!m_InputUser.valid)
+                if (!inputUser.valid)
                     return;
-                m_InputUser.UnpairDevice(device);
+                inputUser.UnpairDevice(device);
             }
 
             public override void SetChannel(string connectionId, RTCDataChannel channel)
@@ -170,16 +169,14 @@ namespace Unity.RenderStreaming
                 receiver = null;
             }
 
-            [NonSerialized] private bool m_Enabled;
-            [NonSerialized] private InputUser m_InputUser;
-
+            [NonSerialized] private InputUser inputUser;
             [NonSerialized] private Receiver receiver;
             [NonSerialized] private InputSystem.InputRemoting receiverInput;
             [NonSerialized] private IDisposable subscriberDisposer;
 
             private void AssignUserAndDevices()
             {
-                m_InputUser = InputUser.all.FirstOrDefault();
+                inputUser = InputUser.all.FirstOrDefault();
             }
 
             protected virtual void OnDeviceChange(InputDevice device, InputDeviceChange change)
