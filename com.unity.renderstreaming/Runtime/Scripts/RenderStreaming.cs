@@ -35,7 +35,7 @@ namespace Unity.RenderStreaming
             var settings = ScriptableObject.CreateInstance<RenderStreamingSettings>();
             var signalingSettings = new WebSocketSignalingSettings
             {
-                urlSignaling = "http://localhost:3000",
+                urlSignaling = "http://127.0.0.1:80",
                 iceServers = new[] {new ICEServer {urls = new[] {"stun:stun.l.google.com:19302"}}}
             };
 
