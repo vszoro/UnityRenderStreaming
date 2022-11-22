@@ -12,6 +12,10 @@ namespace Unity.RenderStreaming.Editor.UI
         {
             VisualElement root = new VisualElement();
             RenderStreamingSettings settings = serializedObject.targetObject as RenderStreamingSettings;
+            if (settings.signalingSettings == null)
+            {
+                settings.signalingSettings = RenderStreaming.Settings.signalingSettings;
+            }
 
             // var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/SampleUI.uxml");
             // visualTree.CloneTree(root);
@@ -29,17 +33,18 @@ namespace Unity.RenderStreaming.Editor.UI
                 serializedObject.ApplyModifiedProperties();
             }));
 
-            var signalingSettings = new SignalingSettings();
-            var signalingSettingsType = RenderStreaming.Settings.signalingSettings.GetType();
+            var signalingSettingsUI = new SignalingSettings();
+            signalingSettingsUI.settings = settings.signalingSettings;
+            var signalingSettingsType = settings.signalingSettings.GetType();
             var popupField = new SignalingTypePopup("Signaling Type", signalingSettingsType.Name);
             popupField.ChangeEvent += newType =>
             {
                 settings.signalingSettings = Activator.CreateInstance(newType) as Unity.RenderStreaming.SignalingSettings;
-                signalingSettings.ChangeSignalingType(newType);
+                signalingSettingsUI.ChangeSignalingType(newType);
             };
-            signalingSettings.ChangeSignalingType(signalingSettingsType);
+            signalingSettingsUI.ChangeSignalingType(signalingSettingsType);
             root.Add(popupField);
-            root.Add(signalingSettings);
+            root.Add(signalingSettingsUI);
 
             return root;
         }

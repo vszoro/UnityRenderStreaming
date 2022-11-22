@@ -5,10 +5,14 @@
     <ui:VisualElement name="renderStreamingContainer">
         <ui:Label text="Render Streaming" name="titleLabel"/>
         <uie:ObjectField label="RenderStreaming Settings" name="renderStreamingSettingsField"  type="Unity.RenderStreaming.RenderStreamingSettings, Unity.RenderStreaming" />
-        <ui:Toggle name="automaticStreaming" label="Automatic Streaming"/>
-        <ui:VisualElement name="signalingTypeContainer"/>
-        <ui:Foldout text="Signaling Settings">
-            <urs:SignalingSettings name="signalingSettings"/>
-        </ui:Foldout>
+        <ui:HelpBox text="Settings for the RenderStreaming are stored in an asset. Click the button below to create a settings asset you can edit." message-type="Info" name="createAssetHelpBox" />
+        <ui:Button text="Create Assets" name="createAssetButton"/>
+        <ui:VisualElement name="settingsPropertyContainer">
+            <ui:Toggle name="automaticStreaming" label="Automatic Streaming"/>
+            <ui:VisualElement name="signalingTypeContainer"/>
+            <ui:Foldout text="Signaling Settings">
+                <urs:SignalingSettings name="signalingSettings"/>
+            </ui:Foldout>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

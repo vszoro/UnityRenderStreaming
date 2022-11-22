@@ -16,12 +16,14 @@ namespace Unity.RenderStreaming.Editor.UI
         {
         }
 
+        internal Unity.RenderStreaming.SignalingSettings settings;
+
         //todo: change codecs model class
         internal List<ICEServer> sourceList =
             new List<ICEServer> {new ICEServer {urls = new[] {"stun:stun.l.google.com:19302"}}};
 
-        internal ObservableCollection<ICEServer> draft;
-        internal VisualElementCache cache;
+        private ObservableCollection<ICEServer> draft;
+        private VisualElementCache cache;
 
         private TextField signalingUrlField => cache.Get<TextField>("signalingUrlField");
         private IntegerField iceServerCountField => cache.Get<IntegerField>("iceServerCountField");
@@ -41,12 +43,14 @@ namespace Unity.RenderStreaming.Editor.UI
             cache = new VisualElementCache(newVisualElement);
             draft = new ObservableCollection<ICEServer>();
 
-            var signalingSettings = RenderStreaming.Settings.signalingSettings;
-            signalingUrlField.value = signalingSettings.urlSignaling;
             signalingUrlField.RegisterCallback<ChangeEvent<string>>(ev =>
             {
-                signalingSettings.urlSignaling = ev.newValue;
+                if (settings != null)
+                {
+                    settings.urlSignaling = ev.newValue;
+                }
             });
+
             iceServerCountField.RegisterCallback<ChangeEvent<int>>(ChangeSize);
         }
 
@@ -57,11 +61,11 @@ namespace Unity.RenderStreaming.Editor.UI
                 throw new InvalidOperationException();
             }
 
-            var oldSettings = RenderStreaming.Settings.signalingSettings;
+            var oldSettings = settings;
             newSettings.runOnAwake = oldSettings.runOnAwake;
             newSettings.urlSignaling = oldSettings.urlSignaling;
             newSettings.iceServers = oldSettings.iceServers;
-            RenderStreaming.Settings.signalingSettings = newSettings;
+            settings = newSettings;
 
             extensionSettingContainer.Clear();
             var inspectorType = CustomSignalingSettingsEditor.FindCustomInspectorTypeByType(newType);
