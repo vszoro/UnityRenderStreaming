@@ -13,8 +13,19 @@ namespace Unity.RenderStreaming.Editor.UI
         const string kTemplatePath = "Packages/com.unity.renderstreaming/Editor/UXML/IceServerSettings.uxml";
         const string kStylePath = "Packages/com.unity.renderstreaming/Editor/Styles/IceServerSettings.uss";
 
-        //todo: change codecs model class
-        internal List<string> sourceList = new List<string> {""};
+        private ICEServer m_iceServer;
+
+        internal ICEServer iceServer
+        {
+            get => m_iceServer;
+            set
+            {
+
+                m_iceServer = value;
+                ApplySettings();
+            }
+        }
+
 #if UNITY_2021_3_OR_NEWER
         internal List<string> draft;
 #else
@@ -48,7 +59,7 @@ namespace Unity.RenderStreaming.Editor.UI
             titleLabel.value = false;
 
 #if UNITY_2021_3_OR_NEWER
-            draft = new List<string>(sourceList);
+            draft = new List<string>();
             Func<VisualElement> makeItem = () =>
             {
                 var textField = new TextField();
@@ -58,7 +69,7 @@ namespace Unity.RenderStreaming.Editor.UI
 #else
             // workaround for unity 2020.3
             // if unity 2021.3 later, prefer using ListView.itemIndexChanged event
-            draft = new ObservableCollection<string>(sourceList);
+            draft = new ObservableCollection<string>();
             Func<VisualElement> makeItem = () =>
             {
                 var textField = new TextField();
@@ -98,6 +109,24 @@ namespace Unity.RenderStreaming.Editor.UI
         private void OnClick()
         {
             onClick?.Invoke();
+        }
+
+        private void ApplySettings()
+        {
+            credentialTypeField.value = iceServer.credentialType;
+            draft.Clear();
+            if (iceServer.urls == null)
+            {
+                draft.Add("");
+            }
+            else
+            {
+                foreach (var url in iceServer.urls)
+                {
+                    draft.Add(url);
+                }
+            }
+            UpdateList();
         }
 
         private void AddUrl()

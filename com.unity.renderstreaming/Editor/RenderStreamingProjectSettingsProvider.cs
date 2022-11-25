@@ -41,7 +41,6 @@ namespace Unity.RenderStreaming
         }
 
         private RenderStreamingSettings settings;
-        private int settingDirtyCount;
         private string[] availableRenderStreamingSettingsAssets;
         private int currentSelectedInputSettingsAsset;
 
@@ -109,7 +108,7 @@ namespace Unity.RenderStreaming
 
         private void InitializeWithCurrentSettingsIfNecessary()
         {
-            if (RenderStreaming.Settings == settings && settings != null && settingDirtyCount == EditorUtility.GetDirtyCount(settings))
+            if (RenderStreaming.Settings == settings && settings != null)
                 return;
 
             InitializeWithCurrentSettings();
@@ -117,12 +116,9 @@ namespace Unity.RenderStreaming
 
         private void InitializeWithCurrentSettings()
         {
-            // Find the set of available assets in the project.
             availableRenderStreamingSettingsAssets = FindRenderStreamingSettingsInProject();
 
-            // See which is the active one.
             settings = RenderStreaming.Settings;
-            settingDirtyCount = EditorUtility.GetDirtyCount(settings);
             var currentSettingsPath = AssetDatabase.GetAssetPath(settings);
             if (string.IsNullOrEmpty(currentSettingsPath))
             {
@@ -138,13 +134,11 @@ namespace Unity.RenderStreaming
                 currentSelectedInputSettingsAsset = ArrayHelpers.IndexOf(availableRenderStreamingSettingsAssets, currentSettingsPath);
                 if (currentSelectedInputSettingsAsset == -1)
                 {
-                    // This is odd and shouldn't happen. Solve by just adding the path to the list.
                     currentSelectedInputSettingsAsset =
                         ArrayHelpers.Append(ref availableRenderStreamingSettingsAssets, currentSettingsPath);
                 }
 
-                ////REVIEW: should we store this by platform?
-                EditorBuildSettings.AddConfigObject(kEditorBuildSettingsConfigKey, settings, true);
+                RenderStreaming.Settings = settings;
             }
         }
 
@@ -156,12 +150,16 @@ namespace Unity.RenderStreaming
 
         private static void CreateNewSettingsAsset(string relativePath)
         {
-            // Create settings file.
             var settings = ScriptableObject.CreateInstance<RenderStreamingSettings>();
+            var signalingSettings = new WebSocketSignalingSettings
+            {
+                urlSignaling = "http://127.0.0.1:80",
+                iceServers = new[] {new ICEServer {urls = new[] {"stun:stun.l.google.com:19302"}}}
+            };
+            settings.automaticStreaming = true;
+            settings.signalingSettings = signalingSettings;
             AssetDatabase.CreateAsset(settings, relativePath);
             EditorGUIUtility.PingObject(settings);
-            // Install the settings. This will lead to an InputSystem.onSettingsChange event which in turn
-            // will cause us to re-initialize.
             RenderStreaming.Settings = settings;
         }
 

@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -16,7 +18,15 @@ namespace Unity.RenderStreaming
         public static RenderStreamingSettings Settings
         {
             get => s_Settings;
-            set => s_Settings = value;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                if (s_Settings == value)
+                    return;
+                s_Settings = value;
+            }
         }
 
         public static bool IsAutomaticEnabled()

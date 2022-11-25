@@ -16,11 +16,17 @@ namespace Unity.RenderStreaming.Editor.UI
         {
         }
 
-        internal Unity.RenderStreaming.SignalingSettings settings;
+        private Unity.RenderStreaming.SignalingSettings m_settings;
 
-        //todo: change codecs model class
-        internal List<ICEServer> sourceList =
-            new List<ICEServer> {new ICEServer {urls = new[] {"stun:stun.l.google.com:19302"}}};
+        internal Unity.RenderStreaming.SignalingSettings settings
+        {
+            get => m_settings;
+            set
+            {
+                m_settings = value;
+                ApplySettings();
+            }
+        }
 
         private ObservableCollection<ICEServer> draft;
         private VisualElementCache cache;
@@ -54,6 +60,17 @@ namespace Unity.RenderStreaming.Editor.UI
             iceServerCountField.RegisterCallback<ChangeEvent<int>>(ChangeSize);
         }
 
+        private void ApplySettings()
+        {
+            signalingUrlField.value = settings.urlSignaling;
+            draft.Clear();
+            foreach (var iceServer in settings.iceServers)
+            {
+                draft.Add(iceServer);
+            }
+            iceServerCountField.value = settings.iceServers.Length;
+        }
+
         public void ChangeSignalingType(Type newType)
         {
             if (!(Activator.CreateInstance(newType) is Unity.RenderStreaming.SignalingSettings newSettings))
@@ -61,11 +78,11 @@ namespace Unity.RenderStreaming.Editor.UI
                 throw new InvalidOperationException();
             }
 
-            var oldSettings = settings;
+            var oldSettings = m_settings;
             newSettings.runOnAwake = oldSettings.runOnAwake;
             newSettings.urlSignaling = oldSettings.urlSignaling;
             newSettings.iceServers = oldSettings.iceServers;
-            settings = newSettings;
+            m_settings = newSettings;
 
             extensionSettingContainer.Clear();
             var inspectorType = CustomSignalingSettingsEditor.FindCustomInspectorTypeByType(newType);
@@ -95,8 +112,16 @@ namespace Unity.RenderStreaming.Editor.UI
             {
                 for (int i = 0; i < diff; i++)
                 {
-                    draft.Add(new ICEServer());
-                    iceServerList.Add(new IceServerSettings(draft.Count));
+                    var addIce = i >= draft.Count;
+                    var iceServer =  addIce ? new ICEServer() : draft[i];
+                    if (addIce)
+                    {
+                        draft.Add(iceServer);
+                    }
+
+                    var iceServerSettings = new IceServerSettings(draft.Count);
+                    iceServerSettings.iceServer = iceServer;
+                    iceServerList.Add(iceServerSettings);
                 }
             }
             else
